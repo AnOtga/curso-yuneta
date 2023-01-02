@@ -4,5 +4,5 @@ CFLAGS = -Wall -O2
 hello: main.c
 	$(CC) $(CFLAGS) main.c -o build/makefile_hello
 
-clean: rm -f hello
+clean: rm -f build/makefile_hello
 
