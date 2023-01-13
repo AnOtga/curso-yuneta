@@ -3,8 +3,10 @@ cmake_minimum_required(VERSION 3.10)
 project(01-print-hello-world)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -std=c99")
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/build")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
+set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}")
 
 add_executable(hello_world ./src/main.c)
 
-install(TARGETS hello_world DESTINATION bin)
+# This makefile expects to be executed from inside the /build folder
+install(TARGETS hello_world DESTINATION ../bin)
