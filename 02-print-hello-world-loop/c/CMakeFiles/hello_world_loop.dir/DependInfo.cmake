@@ -4,7 +4,7 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_C
-  "/home/yuneta/curso-yuneta/curso-yuneta/02-print-hello-world-loop/c/src/main.c" "/home/yuneta/curso-yuneta/curso-yuneta/02-print-hello-world-loop/c/CMakeFiles/hello_world.dir/src/main.c.o"
+  "/yuneta/development/projects/curso-yuneta/angel-oteros/02-print-hello-world-loop/c/src/main.c" "/yuneta/development/projects/curso-yuneta/angel-oteros/02-print-hello-world-loop/c/CMakeFiles/hello_world_loop.dir/src/main.c.o"
   )
 set(CMAKE_C_COMPILER_ID "GNU")
 

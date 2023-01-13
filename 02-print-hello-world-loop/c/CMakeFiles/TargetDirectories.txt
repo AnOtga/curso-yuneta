@@ -1,3 +1,0 @@
-/home/yuneta/curso-yuneta/curso-yuneta/02-print-hello-world-loop/c/CMakeFiles/rebuild_cache.dir
-/home/yuneta/curso-yuneta/curso-yuneta/02-print-hello-world-loop/c/CMakeFiles/hello_world.dir
-/home/yuneta/curso-yuneta/curso-yuneta/02-print-hello-world-loop/c/CMakeFiles/edit_cache.dir

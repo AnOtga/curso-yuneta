@@ -7,10 +7,6 @@ set(CMAKE_DEPENDS_GENERATOR "Unix Makefiles")
 # The top level Makefile was generated from the following files:
 set(CMAKE_MAKEFILE_DEPENDS
   "CMakeCache.txt"
-  "CMakeFiles/3.10.2/CMakeCCompiler.cmake"
-  "CMakeFiles/3.10.2/CMakeCXXCompiler.cmake"
-  "CMakeFiles/3.10.2/CMakeSystem.cmake"
-  "CMakeLists.txt"
   "/usr/share/cmake-3.10/Modules/CMakeCInformation.cmake"
   "/usr/share/cmake-3.10/Modules/CMakeCXXInformation.cmake"
   "/usr/share/cmake-3.10/Modules/CMakeCommonLanguageInclude.cmake"
@@ -27,6 +23,12 @@ set(CMAKE_MAKEFILE_DEPENDS
   "/usr/share/cmake-3.10/Modules/Platform/Linux-GNU.cmake"
   "/usr/share/cmake-3.10/Modules/Platform/Linux.cmake"
   "/usr/share/cmake-3.10/Modules/Platform/UnixPaths.cmake"
+  "01-print-hello-world/c/CMakeLists.txt"
+  "02-print-hello-world-loop/c/CMakeLists.txt"
+  "CMakeFiles/3.10.2/CMakeCCompiler.cmake"
+  "CMakeFiles/3.10.2/CMakeCXXCompiler.cmake"
+  "CMakeFiles/3.10.2/CMakeSystem.cmake"
+  "CMakeLists.txt"
   )
 
 # The corresponding makefile is:
@@ -38,9 +40,12 @@ set(CMAKE_MAKEFILE_OUTPUTS
 # Byproducts of CMake generate step:
 set(CMAKE_MAKEFILE_PRODUCTS
   "CMakeFiles/CMakeDirectoryInformation.cmake"
+  "01-print-hello-world/c/CMakeFiles/CMakeDirectoryInformation.cmake"
+  "02-print-hello-world-loop/c/CMakeFiles/CMakeDirectoryInformation.cmake"
   )
 
 # Dependency information for all targets:
 set(CMAKE_DEPEND_INFO_FILES
-  "CMakeFiles/hello_world.dir/DependInfo.cmake"
+  "01-print-hello-world/c/CMakeFiles/hello_world.dir/DependInfo.cmake"
+  "02-print-hello-world-loop/c/CMakeFiles/hello_world_loop.dir/DependInfo.cmake"
   )

@@ -48,24 +48,25 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/yuneta/curso-yuneta/curso-yuneta/02-print-hello-world-loop/c
+CMAKE_SOURCE_DIR = /yuneta/development/projects/curso-yuneta/angel-oteros
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/yuneta/curso-yuneta/curso-yuneta/02-print-hello-world-loop/c
+CMAKE_BINARY_DIR = /yuneta/development/projects/curso-yuneta/angel-oteros
 
 #=============================================================================
 # Targets provided globally by CMake.
 
-# Special rule for the target rebuild_cache
-rebuild_cache:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
-	/usr/bin/cmake -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
-.PHONY : rebuild_cache
+# Special rule for the target install/strip
+install/strip: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing the project stripped..."
+	/usr/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
+.PHONY : install/strip
 
-# Special rule for the target rebuild_cache
-rebuild_cache/fast: rebuild_cache
-
-.PHONY : rebuild_cache/fast
+# Special rule for the target install/strip
+install/strip/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing the project stripped..."
+	/usr/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
+.PHONY : install/strip/fast
 
 # Special rule for the target edit_cache
 edit_cache:
@@ -78,16 +79,61 @@ edit_cache/fast: edit_cache
 
 .PHONY : edit_cache/fast
 
+# Special rule for the target list_install_components
+list_install_components:
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Available install components are: \"Unspecified\""
+.PHONY : list_install_components
+
+# Special rule for the target list_install_components
+list_install_components/fast: list_install_components
+
+.PHONY : list_install_components/fast
+
+# Special rule for the target install/local
+install/local: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing only the local directory..."
+	/usr/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
+.PHONY : install/local
+
+# Special rule for the target install/local
+install/local/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing only the local directory..."
+	/usr/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
+.PHONY : install/local/fast
+
+# Special rule for the target rebuild_cache
+rebuild_cache:
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
+	/usr/bin/cmake -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+.PHONY : rebuild_cache
+
+# Special rule for the target rebuild_cache
+rebuild_cache/fast: rebuild_cache
+
+.PHONY : rebuild_cache/fast
+
+# Special rule for the target install
+install: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Install the project..."
+	/usr/bin/cmake -P cmake_install.cmake
+.PHONY : install
+
+# Special rule for the target install
+install/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Install the project..."
+	/usr/bin/cmake -P cmake_install.cmake
+.PHONY : install/fast
+
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/yuneta/curso-yuneta/curso-yuneta/02-print-hello-world-loop/c/CMakeFiles /home/yuneta/curso-yuneta/curso-yuneta/02-print-hello-world-loop/c/CMakeFiles/progress.marks
-	$(MAKE) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/yuneta/curso-yuneta/curso-yuneta/02-print-hello-world-loop/c/CMakeFiles 0
+	cd /yuneta/development/projects/curso-yuneta/angel-oteros && $(CMAKE_COMMAND) -E cmake_progress_start /yuneta/development/projects/curso-yuneta/angel-oteros/CMakeFiles /yuneta/development/projects/curso-yuneta/angel-oteros/02-print-hello-world-loop/c/CMakeFiles/progress.marks
+	cd /yuneta/development/projects/curso-yuneta/angel-oteros && $(MAKE) -f CMakeFiles/Makefile2 02-print-hello-world-loop/c/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /yuneta/development/projects/curso-yuneta/angel-oteros/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	$(MAKE) -f CMakeFiles/Makefile2 clean
+	cd /yuneta/development/projects/curso-yuneta/angel-oteros && $(MAKE) -f CMakeFiles/Makefile2 02-print-hello-world-loop/c/clean
 .PHONY : clean
 
 # The main clean target
@@ -97,31 +143,33 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	$(MAKE) -f CMakeFiles/Makefile2 preinstall
+	cd /yuneta/development/projects/curso-yuneta/angel-oteros && $(MAKE) -f CMakeFiles/Makefile2 02-print-hello-world-loop/c/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	$(MAKE) -f CMakeFiles/Makefile2 preinstall
+	cd /yuneta/development/projects/curso-yuneta/angel-oteros && $(MAKE) -f CMakeFiles/Makefile2 02-print-hello-world-loop/c/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd /yuneta/development/projects/curso-yuneta/angel-oteros && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
-#=============================================================================
-# Target rules for targets named hello_world
+# Convenience name for target.
+02-print-hello-world-loop/c/CMakeFiles/hello_world_loop.dir/rule:
+	cd /yuneta/development/projects/curso-yuneta/angel-oteros && $(MAKE) -f CMakeFiles/Makefile2 02-print-hello-world-loop/c/CMakeFiles/hello_world_loop.dir/rule
+.PHONY : 02-print-hello-world-loop/c/CMakeFiles/hello_world_loop.dir/rule
 
-# Build rule for target.
-hello_world: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 hello_world
-.PHONY : hello_world
+# Convenience name for target.
+hello_world_loop: 02-print-hello-world-loop/c/CMakeFiles/hello_world_loop.dir/rule
+
+.PHONY : hello_world_loop
 
 # fast build rule for target.
-hello_world/fast:
-	$(MAKE) -f CMakeFiles/hello_world.dir/build.make CMakeFiles/hello_world.dir/build
-.PHONY : hello_world/fast
+hello_world_loop/fast:
+	cd /yuneta/development/projects/curso-yuneta/angel-oteros && $(MAKE) -f 02-print-hello-world-loop/c/CMakeFiles/hello_world_loop.dir/build.make 02-print-hello-world-loop/c/CMakeFiles/hello_world_loop.dir/build
+.PHONY : hello_world_loop/fast
 
 src/main.o: src/main.c.o
 
@@ -129,7 +177,7 @@ src/main.o: src/main.c.o
 
 # target to build an object file
 src/main.c.o:
-	$(MAKE) -f CMakeFiles/hello_world.dir/build.make CMakeFiles/hello_world.dir/src/main.c.o
+	cd /yuneta/development/projects/curso-yuneta/angel-oteros && $(MAKE) -f 02-print-hello-world-loop/c/CMakeFiles/hello_world_loop.dir/build.make 02-print-hello-world-loop/c/CMakeFiles/hello_world_loop.dir/src/main.c.o
 .PHONY : src/main.c.o
 
 src/main.i: src/main.c.i
@@ -138,7 +186,7 @@ src/main.i: src/main.c.i
 
 # target to preprocess a source file
 src/main.c.i:
-	$(MAKE) -f CMakeFiles/hello_world.dir/build.make CMakeFiles/hello_world.dir/src/main.c.i
+	cd /yuneta/development/projects/curso-yuneta/angel-oteros && $(MAKE) -f 02-print-hello-world-loop/c/CMakeFiles/hello_world_loop.dir/build.make 02-print-hello-world-loop/c/CMakeFiles/hello_world_loop.dir/src/main.c.i
 .PHONY : src/main.c.i
 
 src/main.s: src/main.c.s
@@ -147,7 +195,7 @@ src/main.s: src/main.c.s
 
 # target to generate assembly for a file
 src/main.c.s:
-	$(MAKE) -f CMakeFiles/hello_world.dir/build.make CMakeFiles/hello_world.dir/src/main.c.s
+	cd /yuneta/development/projects/curso-yuneta/angel-oteros && $(MAKE) -f 02-print-hello-world-loop/c/CMakeFiles/hello_world_loop.dir/build.make 02-print-hello-world-loop/c/CMakeFiles/hello_world_loop.dir/src/main.c.s
 .PHONY : src/main.c.s
 
 # Help Target
@@ -156,9 +204,13 @@ help:
 	@echo "... all (the default if no target is provided)"
 	@echo "... clean"
 	@echo "... depend"
-	@echo "... rebuild_cache"
-	@echo "... hello_world"
+	@echo "... install/strip"
 	@echo "... edit_cache"
+	@echo "... hello_world_loop"
+	@echo "... list_install_components"
+	@echo "... install/local"
+	@echo "... rebuild_cache"
+	@echo "... install"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
@@ -173,6 +225,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /yuneta/development/projects/curso-yuneta/angel-oteros && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 
