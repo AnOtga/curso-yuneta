@@ -1,1 +1,6 @@
 **/build
+.directory
+.vscode
+.kdev4
+.git
+*.kdev4
