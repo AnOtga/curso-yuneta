@@ -1,1 +1,0 @@
-/usr/bin/cc  -Wall -std=c99 -Wall -std=c99 -g   CMakeFiles/hello_world.dir/src/main.c.o  -o ../../build/hello_world 

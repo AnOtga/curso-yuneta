@@ -2,8 +2,9 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <time.h>
+#include <bits/types/clock_t.h>
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     int n;
 
@@ -21,8 +22,7 @@ int main(int argc, char *argv[])
     clock_t clockEnd;
     clock_t clockStart = clock();
 
-    for (size_t i = 0; i < n; i++)
-    {
+    for (size_t i = 0; i < n; i++) {
         printf("Hello world\n");
     }
 
