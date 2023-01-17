@@ -44,8 +44,8 @@ int main(int argc, char* argv[])
     clock_gettime(CLOCK_MONOTONIC, &et);
 
     tt = ts_diff(st, et);
-    printf("Time elapsed: %f seconds\n", tt);
-    printf("Lines printed: %i\n", n);
+    printf("Time elapsed: %lu.%lus seconds\n", tt.tv_sec, tt.tv_nsec);
+    printf("Lines printed: %lu\n", n);
 
     return 0;
 }
