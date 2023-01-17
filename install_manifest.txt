@@ -1,2 +1,0 @@
-/yuneta/development/projects/curso-yuneta/angel-oteros/bin/hello_world
-/yuneta/development/projects/curso-yuneta/angel-oteros/bin/hello_world_loop

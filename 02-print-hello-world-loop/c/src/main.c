@@ -1,12 +1,28 @@
+#include <argp.h>
+#include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <stdint.h>
+#include <string.h>
+#include <inttypes.h>
 #include <time.h>
-#include <bits/types/clock_t.h>
+
+static inline struct timespec ts_diff (struct timespec start, struct timespec end)
+{
+    struct timespec temp;
+    if ((end.tv_nsec - start.tv_nsec) < 0) {
+        temp.tv_sec = end.tv_sec - start.tv_sec - 1;
+        temp.tv_nsec = 1000000000 + end.tv_nsec - start.tv_nsec;
+    } else {
+        temp.tv_sec = end.tv_sec - start.tv_sec;
+        temp.tv_nsec = end.tv_nsec - start.tv_nsec;
+    }
+    return temp;
+}
 
 int main(int argc, char* argv[])
 {
-    int n;
+    uint64_t n;
+    struct timespec st, et, tt;
 
     if (argc < 2) {
         n = 100;
@@ -19,16 +35,17 @@ int main(int argc, char* argv[])
         printf("Invalid argument.");
     }
 
-    clock_t clockEnd;
-    clock_t clockStart = clock();
+    clock_gettime(CLOCK_MONOTONIC, &st);
 
     for (size_t i = 0; i < n; i++) {
         printf("Hello world\n");
     }
 
-    clockEnd = clock();
-    printf("Time elapsed: %.2f seconds\n", (double)(clockEnd - clockStart) / CLOCKS_PER_SEC);
-    printf("Lines printed: %.i\n", n);
+    clock_gettime(CLOCK_MONOTONIC, &et);
+
+    tt = ts_diff(st, et);
+    printf("Time elapsed: %f seconds\n", tt);
+    printf("Lines printed: %i\n", n);
 
     return 0;
 }
