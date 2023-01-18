@@ -12,7 +12,7 @@ project(01-print-hello-world)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -std=c99")
 set(PROJECT_ROOT_DIR /yuneta/development/projects/curso-yuneta/angel-oteros)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
-set(CMAKE_INSTALL_PREFIX ${PROJECT_ROOT_DIR}/bin)
+set(CMAKE_INSTALL_PREFIX ${PROJECT_ROOT_DIR})
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)
   add_definitions(-DDEBUG)
@@ -47,7 +47,14 @@ add_executable(hello_world ./src/main.c)
 #   Installation
 ##############################################
 # This makefile expects to be executed from inside the /build folder
-install(TARGETS hello_world DESTINATION .)
+install(
+    TARGETS hello_world
+    PERMISSIONS
+    OWNER_READ OWNER_WRITE OWNER_EXECUTE
+    GROUP_READ GROUP_WRITE GROUP_EXECUTE
+    WORLD_READ WORLD_EXECUTE
+    DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
+)
 
 
 # compile in Release mode optimized but adding debug symbols, useful for profiling :
