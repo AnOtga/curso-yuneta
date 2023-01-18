@@ -9,7 +9,7 @@
 /***************************************************************************
  *      Data
  ***************************************************************************/
-const char *argp_program_version = "Hello_World_Loop 1.0";
+const char *argp_program_version = "Hello_World_Loop 0.3";
 const char *argp_program_bug_address = "<example@example.com>";
 
 /* Program documentation. */
@@ -24,8 +24,6 @@ static char args_doc[] = "";
  */
 static struct argp_option options[] = {
 {"lines", 'l', "LINES", 0, "Number of lines to print"},
-{"help", 'h', 0, 0, "Produce help message"},
-{"version", 'v', 0, 0, "Print version information"},
 {0}
 };
 
@@ -49,11 +47,7 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state)
             arguments->lines = atoi(arg);
         }
         break;
-    case 'h':
-        argp_state_help (state, state->out_stream, ARGP_HELP_SHORT_USAGE | ARGP_HELP_LONG);
-        break;
-    case 'v':
-        argp_state_help (state, state->out_stream, ARGP_HELP_SEE);
+
     case ARGP_KEY_ARG:
         return 0;
 
