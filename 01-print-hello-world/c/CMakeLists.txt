@@ -11,7 +11,8 @@ project(01-print-hello-world)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -std=c99")
 set(PROJECT_ROOT_DIR /yuneta/development/projects/curso-yuneta/angel-oteros)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
+#This changes the output direction of the executable created in a <make> to the root of the build output, which is not needed here.
+#set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
 set(CMAKE_INSTALL_PREFIX ${PROJECT_ROOT_DIR})
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)
@@ -37,10 +38,19 @@ else(HAVE_REGEX_H)
     message("***  WARNING: GNU C regex library not found.")
 endif(HAVE_REGEX_H)
 
+
 ##############################################
 #   Source
 ##############################################
-add_executable(hello_world ./src/main.c)
+SET (SOURCE_BASE_FILES
+    ./src/main.c
+)
+
+
+##############################################
+#   Add sources to executables to build
+##############################################
+add_executable(hello_world ${SOURCE_BASE_FILES})
 
 
 ##############################################

@@ -6,12 +6,12 @@ include(CheckIncludeFiles)
 include(CheckSymbolExists)
 
 
-project(02-print-hello-world-loop)
+project(03-print-hello-parametername)
 
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -std=c99")
 set(PROJECT_ROOT_DIR /yuneta/development/projects/curso-yuneta/angel-oteros)
-#This changes the output direction of the executable created in a <make> to the root of the build output, so it's not needed
+#This changes the output direction of the executable created in a <make> to the root of the build output, which is not needed here, thus commented out
 #set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
 set(CMAKE_INSTALL_PREFIX ${PROJECT_ROOT_DIR})
 
@@ -48,7 +48,7 @@ SET (SOURCE_BASE_FILES
 ##############################################
 #   Add sources to executables to build
 ##############################################
-add_executable(hello_world_loop ${SOURCE_BASE_FILES})
+add_executable(hello_parametername ${SOURCE_BASE_FILES})
 
 
 ##############################################
@@ -56,7 +56,7 @@ add_executable(hello_world_loop ${SOURCE_BASE_FILES})
 ##############################################
 # This makefile expects to be executed from inside the /build folder
 install(
-    TARGETS hello_world_loop
+    TARGETS hello_parametername
     PERMISSIONS
     OWNER_READ OWNER_WRITE OWNER_EXECUTE
     GROUP_READ GROUP_WRITE GROUP_EXECUTE
