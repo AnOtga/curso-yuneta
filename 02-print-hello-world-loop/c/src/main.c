@@ -23,7 +23,7 @@ static char args_doc[] = "";
  *  See https://www.gnu.org/software/libc/manual/html_node/Argp-Option-Vectors.html
  */
 static struct argp_option options[] = {
-{"lines", 'l', "LINES", 0, "Number of lines to print"},
+{"lines", 'l', "LINES", 0, "Number of lines to print", 0},
 {0}
 };
 
