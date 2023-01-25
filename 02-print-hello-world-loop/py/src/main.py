@@ -1,16 +1,25 @@
+#!/usr/bin/env python
+
 import argparse
 import time
 
-parser = argparse.ArgumentParser(description='Prints a specified number of "Hello <name>" lines, where name is the required argument.')
+program_version = "Hello World Loop 0.0.1"
 
-parser.add_argument("name", help="Name to use in the output")
-parser.add_argument("--lines", "-l", help="Number of lines to print, defaults to 100", default=100, type=int)
-args = parser.parse_args()
+#######################################################
+#      Main Program
+#######################################################
+def main():
+    parser = argparse.ArgumentParser(description='Prints a specified number of "Hello World" lines.')
+    parser.add_argument("-v", "--version", help="Print program version", action="version", version=program_version)
+    parser.add_argument("--lines", "-l", help="Number of lines to print, defaults to 100", default=100, type=int)
+    args = parser.parse_args()
 
-st = time.time()
-for i in range(args.lines):
-    print("Hello {}".format(args.name))
-et = time.time()
+    st = time.time()
+    for i in range(args.lines):
+        print("Hello World")
+    et = time.time()
 
-print("Time taken to execute {} prints: {}".format(args.lines, et - st))
+    print("Time taken to execute {} prints: {}".format(args.lines, et - st))
 
+if __name__ == "__main__":
+    main()
