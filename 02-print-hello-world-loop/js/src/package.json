@@ -1,6 +1,0 @@
-{
-  "dependencies": {
-    "commander": "^10.0.0",
-    "minimist": "^1.2.7"
-  }
-}
