@@ -50,6 +50,15 @@ SET (SOURCE_BASE_FILES
 ##############################################
 add_executable(tcp_listener ${SOURCE_BASE_FILES})
 
+TARGET_LINK_LIBRARIES(tcp_listener
+    /yuneta/development/output/lib/libuv.a
+
+    pthread dl  # used by libuv
+    lzma        # used by libunwind
+    z rt m
+    uuid
+    util
+)
 
 ##############################################
 #   Installation

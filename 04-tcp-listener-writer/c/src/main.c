@@ -1,43 +1,39 @@
 #include <argp.h>
-#include <math.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
-#include <inttypes.h>
-#include <time.h>
+#include <uv.h>
+
 
 /***************************************************************************
  *      Data
  ***************************************************************************/
-const char *argp_program_version = "Hello_World_ParameterName 0.1";
+const char *argp_program_version = "TCP listener 0.1";
 const char *argp_program_bug_address = "<example@example.com>";
 
 /* Program documentation. */
-static char doc[] = "Prints a specified number of lines containing 'Hello <name>', where <name> is a required argument.";
+static char doc[] ="Listen to a TCP port, waiting for data.";
 
-/* A description of the required must-have arguments we accept. */
-static char args_doc[] = "name";
+/* A description of the arguments we accept. */
+static char args_doc[] = "";
 
-/*
- *  The options we understand.
- *  See https://www.gnu.org/software/libc/manual/html_node/Argp-Option-Vectors.html
- */
 static struct argp_option options[] = {
-{"lines", 'l', "LINES", 0, "Number of lines to print, defaults to 100", 0},
-{0}
+    {0, 0, 0, 0, "Options:"},
+    {"port", 'p', "PORT", 0, "Set port to listen.(default: 7000)", 1},
+    {"ip", 'i', "IP", 0, "Set ip to listen.(default: 127.0.0.1)", 1},
+    {0},
 };
 
-/* Used by main to communicate with parse_opt*/
-struct arguments {
-    uint64_t lines;
-    char* name;
+struct arguments
+{
+    int port;
+    char *ip;
 };
 
-/*
- * Parse a single option
- * See https://www.gnu.org/software/libc/manual/html_node/Argp-Helper-Functions.html for more information
- */
-static error_t parse_opt (int key, char *arg, struct argp_state *state)
+/********************************************************************
+ *  Parse a single option
+ ********************************************************************/
+static error_t parse_opt(int key, char *arg, struct argp_state *state)
 {
     /*
      *  Get the input argument from argp_parse,
@@ -45,37 +41,26 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state)
      */
     struct arguments *arguments = state->input;
 
-    switch (key) {
-    case 'l':
-        if(arg) {
-            arguments->lines = atoi(arg);
-        }
-        break;
+    switch(key) {
+        case 'p':
+            if(arg) {
+                arguments->port = atoi(arg);
+            }
+            break;
+        case 'i':
+            if(arg) {
+                arguments->ip = arg;
+            }
+            break;
 
-    case ARGP_KEY_ARG: {
-        //Parse arg at index 0 (?)
-        if(state->arg_num == 0) {
-            arguments->name = arg;
-        }
-        else {
-            //Something seems to have went wrong, exit.
-            argp_usage(state);
-        }
-        break;
+        case ARGP_KEY_ARG:
+            return 0;
+        case ARGP_KEY_END:
+            return 0;
+        default:
+            return ARGP_ERR_UNKNOWN;
+
     }
-
-    case ARGP_KEY_END: {
-        // We have reached the end of the arguments, validate them
-        if(arguments->name == NULL) {
-            argp_error(state, "Required argument NAME is null!");
-        }
-        break;
-    }
-
-    default:
-        return ARGP_ERR_UNKNOWN;
-    }
-
     return 0;
 }
 
@@ -84,48 +69,101 @@ static struct argp argp = {
     options,
     parse_opt,
     args_doc,
-    doc
+    doc,
 };
 
+uv_tcp_t server;
+uv_loop_t *loop;
 
-/***************************************************************************
- *      Main program
- ***************************************************************************/
-static inline struct timespec ts_diff (struct timespec start, struct timespec end)
-{
-    struct timespec temp;
-    if ((end.tv_nsec - start.tv_nsec) < 0) {
-        temp.tv_sec = end.tv_sec - start.tv_sec - 1;
-        temp.tv_nsec = 1000000000 + end.tv_nsec - start.tv_nsec;
-    } else {
-        temp.tv_sec = end.tv_sec - start.tv_sec;
-        temp.tv_nsec = end.tv_nsec - start.tv_nsec;
-    }
-    return temp;
+
+/*****************************************************************
+ *  Close
+ *****************************************************************/
+void on_close(uv_handle_t* handle) {
+    free(handle);
 }
 
-int main(int argc, char* argv[])
+/*******************************************************************
+ *  Read data
+ *******************************************************************/
+void on_read(uv_stream_t *client, ssize_t nread, const uv_buf_t *buf)
 {
-    struct arguments arguments;
-    memset(&arguments, 0, sizeof(arguments));
-    //Set Default values
-    arguments.lines = 100;
-    //And parse the arguments
-    argp_parse(&argp, argc, argv, 0, 0, &arguments);
-
-    struct timespec st, et, tt;
-
-    clock_gettime(CLOCK_MONOTONIC, &st);
-
-    for (size_t i = 0; i < arguments.lines; i++) {
-        printf("Hello %s\n", arguments.name);
+    if(nread < 0) {
+        if(nread != UV_EOF)
+            fprintf(stderr, "Read error %s\n", uv_err_name(nread));
+        uv_close((uv_handle_t *)client, on_close);
+        free(buf->base);
+        return;
     }
 
-    clock_gettime(CLOCK_MONOTONIC, &et);
+    if (nread > 0) {
+    // Do something with the received data
+    printf("Received %ld bytes of data: %s\n", nread, buf->base);
+  }
+    free(buf->base);
+}
 
-    tt = ts_diff(st, et);
-    printf("Time elapsed: %lu.%lus seconds\n", tt.tv_sec, tt.tv_nsec);
-    printf("Lines printed: %lu\n", arguments.lines);
+/*****************************************************************
+ *  alloc buffer
+ *****************************************************************/
+void alloc_buffer(uv_handle_t *handle, size_t suggested_size, uv_buf_t *buf)
+{
+    char *base;
+    base = (char *)calloc(1, suggested_size);
+    if(!base)
+        *buf = uv_buf_init(NULL, 0);
+    else
+        *buf = uv_buf_init(base, suggested_size);
+}
 
-    return 0;
+/*****************************************************************
+ *  Conection
+ *****************************************************************/
+void on_connect(uv_stream_t *server, int status)
+{
+    if(status < 0) {
+        fprintf(stderr, "Connect error %s\n", uv_strerror(status));
+        return;
+    }
+
+    uv_tcp_t *client = (uv_tcp_t *)malloc(sizeof(uv_tcp_t));
+    uv_tcp_init(loop, client);
+
+    if(uv_accept(server, (uv_stream_t *)client) == 0) {
+        uv_read_start((uv_stream_t *)client, alloc_buffer, on_read);
+    } else {
+        uv_close((uv_handle_t *)client, on_close);
+    }
+}
+
+/*****************************************************************
+ *                      Main
+ *****************************************************************/
+int main(int argc, char *argv[])
+{
+    struct sockaddr_in addr;
+    struct arguments arguments;
+
+    /*Default values*/
+    memset(&arguments, 0, sizeof(arguments));
+    arguments.port = 7000;
+    arguments.ip = "127.0.0.1";
+
+    /*Parse arguments*/
+    argp_parse(&argp, argc, argv, 0, 0, &arguments);
+
+    loop = uv_default_loop();
+
+
+    uv_tcp_init(loop, &server);
+
+    uv_ip4_addr(arguments.ip, arguments.port, &addr);
+
+    uv_tcp_bind(&server, (const struct sockaddr *)&addr, 0);
+    int r = uv_listen((uv_stream_t *)&server, 128, on_connect);
+    if(r) {
+        fprintf(stderr, "Listen error %s\n", uv_strerror(r));
+        return 1;
+    }
+    return uv_run(loop, UV_RUN_DEFAULT);
 }
