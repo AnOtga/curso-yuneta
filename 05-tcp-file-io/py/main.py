@@ -23,12 +23,14 @@ def main():
 
     try:
         # Open file
-        with open(args.FILEPATH, "r") as file:
-            # Read the file, and send it encoded
+        with open(args.FILEPATH, "rb") as file:
             content = file.read()
-
             print("-- Sending file --\n{}".format(content))
-            sock.sendall(content.encode())
+
+            #Encode both file name and file data in bytes
+            sock.sendall((args.FILEPATH).encode() + b"\0" + content.encode())
+
+            file.close()
 
     finally:
         #Close

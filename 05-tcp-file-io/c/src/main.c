@@ -97,34 +97,34 @@ void on_read(uv_stream_t *client, ssize_t nread, const uv_buf_t *buf)
         return;
     }
 
-    char filename[256];
-    FILE *fp;
-    int filenameOffset = 0;
-    int filesize = -1;
-
     if (nread > 0) {
-        //Loop until we find the file name null termination, then create a file.
+
+        int filenameOffset = 0;
+
+        //Loop until we find the file name null termination.
+        //The python script sends FILEPATH + '\0' + content.encoded
         for (size_t i = 0; i < nread; i++) {
             if(buf->base[i] == '\0') {
-                strncpy(filename, buf->base,i);
-                filename[i] = '\0';
-                fp = fopen(filename, "w+");
-                //Get file size and file name offset
-                filesize = *((int *)(buf->base - (i + 1)));
                 filenameOffset = i + 1;
                 break;
             }
         }
 
-        if(filesize > -1) {
-            //Write, starting from the offset of the filename
-            fwrite(buf->base, sizeof(char), filesize, fp);
+        int filesize = *((int *)(buf->base - filenameOffset));
+        char filename[filenameOffset];
+        strncpy(filename, (char *)buf->base, filenameOffset);
 
-            // Close both the handle and the file
-            uv_close((uv_handle_t *)client, on_close);
-            fclose(fp);
-            printf("Successfully received %d bytes, saved to %s\n", (int)nread, filename);
-        }
+        printf("Received a file with name: %s\n", filename);
+
+        //Open and then write, starting from the offset of the filename
+        FILE *fp = fopen(filename, "w+");
+        fwrite(buf->base + filenameOffset, sizeof(char), filesize, fp);
+
+        // Close both the handle and the file
+        uv_close((uv_handle_t *)client, on_close);
+        fclose(fp);
+        printf("Successfully received %d bytes, saved to %s\n", (int)nread, filename);
+
   }
   // Make sure to free buffer once done
   free(buf->base);
