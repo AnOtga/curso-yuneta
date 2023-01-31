@@ -110,14 +110,14 @@ void on_read(uv_stream_t *client, ssize_t nread, const uv_buf_t *buf)
             }
         }
 
-        int filesize = *((int *)(buf->base - filenameOffset));
+        int filesize = nread - filenameOffset - 1;
         char filename[filenameOffset];
         strncpy(filename, (char *)buf->base, filenameOffset);
 
         printf("Received a file with name: %s\n", filename);
 
         //Open and then write, starting from the offset of the filename
-        FILE *fp = fopen(filename, "w+");
+        FILE *fp = fopen((char *)filename, "w+");
         fwrite(buf->base + filenameOffset, sizeof(char), filesize, fp);
 
         // Close both the handle and the file

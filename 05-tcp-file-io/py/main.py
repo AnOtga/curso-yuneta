@@ -28,7 +28,7 @@ def main():
             print("-- Sending file --\n{}".format(content))
 
             #Encode both file name and file data in bytes
-            sock.sendall((args.FILEPATH).encode() + b"\0" + content.encode())
+            sock.sendall((args.FILEPATH + "\0").encode() + content)
 
             file.close()
 
