@@ -1,0 +1,17 @@
+FILE 02 Data types¶
+
+type uv_stream_t
+
+    Stream handle type.
+
+type uv_connect_t
+
+    Connect request type.
+
+type uv_shutdown_t
+
+    Shutdown request type.
+
+type uv_write_t
+
+    Write request type. Careful attention must be paid when reusing objects of this type. When a stream is in non-blocking mode, write requests sent with uv_write will be queued. Reusing objects at this point is undefined behaviour. It is safe to reuse the uv_write_t object only after the callback passed to uv_write is fired.

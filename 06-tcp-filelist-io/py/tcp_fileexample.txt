@@ -1,0 +1,7 @@
+Quick Start FILE 01
+
+You write code to describe your command line interface. Commander looks after parsing the arguments into options and command-arguments, displays usage errors for problems, and implements a help system.
+
+Commander is strict and displays an error for unrecognised options. The two most used option types are a boolean option, and an option which takes its value from the following argument.
+
+Example file: split.js
