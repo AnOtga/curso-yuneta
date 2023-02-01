@@ -50,7 +50,7 @@ SET (SOURCE_BASE_FILES
 ##############################################
 #   Add sources to executables to build
 ##############################################
-add_executable(hello_world ${SOURCE_BASE_FILES})
+add_executable(01-hello_world ${SOURCE_BASE_FILES})
 
 
 ##############################################
@@ -58,7 +58,7 @@ add_executable(hello_world ${SOURCE_BASE_FILES})
 ##############################################
 # This makefile expects to be executed from inside the /build folder
 install(
-    TARGETS hello_world
+    TARGETS 01-hello_world
     PERMISSIONS
     OWNER_READ OWNER_WRITE OWNER_EXECUTE
     GROUP_READ GROUP_WRITE GROUP_EXECUTE

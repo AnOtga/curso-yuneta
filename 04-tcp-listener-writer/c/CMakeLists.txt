@@ -48,9 +48,9 @@ SET (SOURCE_BASE_FILES
 ##############################################
 #   Add sources to executables to build
 ##############################################
-add_executable(tcp_listener ${SOURCE_BASE_FILES})
+add_executable(04-tcp_listener ${SOURCE_BASE_FILES})
 
-TARGET_LINK_LIBRARIES(tcp_listener
+TARGET_LINK_LIBRARIES(04-tcp_listener
     /yuneta/development/output/lib/libuv.a
 
     pthread dl  # used by libuv
@@ -65,7 +65,7 @@ TARGET_LINK_LIBRARIES(tcp_listener
 ##############################################
 # This makefile expects to be executed from inside the /build folder
 install(
-    TARGETS tcp_listener
+    TARGETS 04-tcp_listener
     PERMISSIONS
     OWNER_READ OWNER_WRITE OWNER_EXECUTE
     GROUP_READ GROUP_WRITE GROUP_EXECUTE

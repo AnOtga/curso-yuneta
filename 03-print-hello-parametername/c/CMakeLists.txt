@@ -48,7 +48,7 @@ SET (SOURCE_BASE_FILES
 ##############################################
 #   Add sources to executables to build
 ##############################################
-add_executable(hello_parametername ${SOURCE_BASE_FILES})
+add_executable(03-hello_parametername ${SOURCE_BASE_FILES})
 
 
 ##############################################
@@ -56,7 +56,7 @@ add_executable(hello_parametername ${SOURCE_BASE_FILES})
 ##############################################
 # This makefile expects to be executed from inside the /build folder
 install(
-    TARGETS hello_parametername
+    TARGETS 03-hello_parametername
     PERMISSIONS
     OWNER_READ OWNER_WRITE OWNER_EXECUTE
     GROUP_READ GROUP_WRITE GROUP_EXECUTE
