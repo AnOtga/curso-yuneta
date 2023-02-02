@@ -157,6 +157,24 @@ void on_connect(uv_stream_t *server, int status)
     uv_tcp_init(loop, client);
 
     if(uv_accept(server, (uv_stream_t *)client) == 0) {
+        //Get peername
+        struct sockaddr_storage peername;
+        int peernamelen = sizeof(peername);
+        uv_tcp_getpeername(client, (struct sockaddr*) &peername, &peernamelen);
+
+        char peernameAsString[INET6_ADDRSTRLEN];
+        uv_ip_name((struct sockaddr*) &peername, peernameAsString, sizeof(peernameAsString));
+
+        //Get sockname
+        struct sockaddr_storage sockname;
+        int socknamelen = sizeof(sockname);
+        uv_tcp_getsockname(client, (struct sockaddr*) &sockname, &socknamelen);
+
+        char socknameAsString[INET6_ADDRSTRLEN];
+        uv_ip_name((struct sockaddr*) &sockname, socknameAsString, sizeof(socknameAsString));
+
+        printf("Connecting to %s through %s\n", peernameAsString, socknameAsString);
+
         uv_read_start((uv_stream_t *)client, alloc_buffer, on_read);
     } else {
         uv_close((uv_handle_t *)client, on_close);

@@ -20,12 +20,13 @@ def main():
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     print("Connecting to {}:{} ".format(args.ip, args.port))
     sock.connect((args.ip, args.port))
+    print("Connection has been established to {} through {} ".format(sock.getpeername(), sock.getsockname()))
 
     try:
         # Open file
         with open(args.FILEPATH, "rb") as file:
             content = file.read()
-            print("-- Sending file --\n{}".format(content))
+            #print("-- Sending file --\n{}".format(content))
 
             #Encode both file name and file data in bytes
             sock.sendall((args.FILEPATH + "\0").encode() + content)

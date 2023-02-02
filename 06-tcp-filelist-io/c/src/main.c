@@ -125,7 +125,7 @@ void on_read(uv_stream_t *client, ssize_t nread, const uv_buf_t *buf)
         printf("Successfully received %d bytes, saved to %s\n", (int)nread, filename);
 
 
-        // Send Confirmation tat we got a message
+        // Send Confirmation that we recieved a message just fine
         uv_write_t *req = malloc(sizeof(uv_write_t));
         uv_buf_t buf = uv_buf_init("OK\n", 3);
         uv_write(req, (uv_stream_t *)client, &buf, 1, NULL);
