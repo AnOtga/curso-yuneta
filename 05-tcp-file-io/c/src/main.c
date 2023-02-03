@@ -8,11 +8,11 @@
 /***************************************************************************
  *      Data
  ***************************************************************************/
-const char *argp_program_version = "TCP file reader 0.1";
-const char *argp_program_bug_address = "<example@example.com>";
+const char* argp_program_version = "TCP file reader 0.1";
+const char* argp_program_bug_address = "<example@example.com>";
 
 /* Program documentation. */
-static char doc[] ="Listen to a TCP port, awaiting for a file, then read it.";
+static char doc[] = "Listen to a TCP port, awaiting for a file, then read it.";
 
 /* A description of the arguments we accept. */
 static char args_doc[] = "";
@@ -27,38 +27,38 @@ static struct argp_option options[] = {
 struct arguments
 {
     int port;
-    char *ip;
+    char* ip;
 };
 
 /********************************************************************
  *  Parse a single option
  ********************************************************************/
-static error_t parse_opt(int key, char *arg, struct argp_state *state)
+static error_t parse_opt(int key, char* arg, struct argp_state* state)
 {
     /*
      *  Get the input argument from argp_parse,
      *  which we know is a pointer to our arguments structure.
      */
-    struct arguments *arguments = state->input;
+    struct arguments* arguments = state->input;
 
-    switch(key) {
-        case 'p':
-            if(arg) {
-                arguments->port = atoi(arg);
-            }
-            break;
-        case 'i':
-            if(arg) {
-                arguments->ip = arg;
-            }
-            break;
+    switch (key) {
+    case 'p':
+        if (arg) {
+            arguments->port = atoi(arg);
+        }
+        break;
+    case 'i':
+        if (arg) {
+            arguments->ip = arg;
+        }
+        break;
 
-        case ARGP_KEY_ARG:
-            return 0;
-        case ARGP_KEY_END:
-            return 0;
-        default:
-            return ARGP_ERR_UNKNOWN;
+    case ARGP_KEY_ARG:
+        return 0;
+    case ARGP_KEY_END:
+        return 0;
+    default:
+        return ARGP_ERR_UNKNOWN;
 
     }
     return 0;
@@ -72,72 +72,104 @@ static struct argp argp = {
     doc,
 };
 
+int currentFileNameOffset;
+int currentFullFileSize;
+int currentBytesRead;
+FILE* currentFile;
 uv_tcp_t server;
-uv_loop_t *loop;
+uv_loop_t* loop;
 
 
 /*****************************************************************
  *  Close
  *****************************************************************/
-void on_close(uv_handle_t* handle) {
+void on_close(uv_handle_t* handle)
+{
     free(handle);
 }
 
 /*******************************************************************
  *  Read data
  *******************************************************************/
-void on_read(uv_stream_t *client, ssize_t nread, const uv_buf_t *buf)
+void on_read(uv_stream_t* client, ssize_t nread, const uv_buf_t* buf)
 {
     //We haven't reach the EOF, assume something went wrong
-    if(nread < 0) {
-        if(nread != UV_EOF)
+    if (nread < 0) {
+        if (nread != UV_EOF)
             fprintf(stderr, "Read error %s\n", uv_err_name(nread));
-        uv_close((uv_handle_t *)client, on_close);
+        uv_close((uv_handle_t*)client, on_close);
         free(buf->base);
         return;
     }
 
+    currentBytesRead += nread;
+
     if (nread > 0) {
+        //Get the file information once.
+        if (currentFile == NULL) {
+            currentFileNameOffset = 0;
+            currentFullFileSize = 0;
 
-        int filenameOffset = 0;
+            //File size is found in the first 4 bytes of a file
+            memcpy(&currentFullFileSize, buf->base, 4);
+            currentFullFileSize = ntohl(currentFullFileSize);
 
-        //Loop until we find the file name null termination.
-        //The python script sends FILEPATH + '\0' + content.encoded
-        for (size_t i = 0; i < nread; i++) {
-            if(buf->base[i] == '\0') {
-                filenameOffset = i + 1;
-                break;
+            //Loop until we find the file name null termination.
+            //The python script sends FILEPATH + '\0' + content.encoded
+            for (size_t i = 0; i < nread; i++) {
+                if (buf->base[i] == '\0') {
+                    currentFileNameOffset = i + 1;
+                    break;
+                }
             }
+
+            char filename[currentFileNameOffset];
+            strncpy(filename, (char*)buf->base, currentFileNameOffset);
+
+            printf("Received a file with name: %s\n", filename);
+
+            //Open file
+            currentFile = fopen((char*)filename, "w+");
         }
 
-        int filesize = nread - filenameOffset - 1;
-        char filename[filenameOffset];
-        strncpy(filename, (char *)buf->base, filenameOffset);
+        if (currentFile != NULL) {
+            //Write starting off the file name offset
+            fwrite(buf->base + currentFileNameOffset, sizeof(char), nread, currentFile);
+        }
+        // Send Confirmation that we recieved a message just fine
+        uv_write_t* req = malloc(sizeof(uv_write_t));
+        char percentage[10];
+        sprintf(percentage, "%.2f%%\n", ((double)currentBytesRead / (double)currentFullFileSize) * 100);
+        uv_buf_t responseBuf = uv_buf_init(percentage, strlen(percentage));
+        uv_write(req, (uv_stream_t*)client, &responseBuf, 1, NULL);
+    }
 
-        printf("Received a file with name: %s\n", filename);
+    if (currentBytesRead >= currentFullFileSize) {
+        // Close both the handle and the file when done reading
+        uv_close((uv_handle_t*)client, on_close);
+        fclose(currentFile);
+        //Set to null just in case
+        currentFile = NULL;
+        printf("Successfully received %d bytes\n", (int)nread);
 
-        //Open and then write, starting from the offset of the filename
-        FILE *fp = fopen((char *)filename, "w+");
-        fwrite(buf->base + filenameOffset, sizeof(char), filesize, fp);
+        //Send the client a message that we are done
+        uv_write_t *req = malloc(sizeof(uv_write_t));
+        uv_buf_t buf = uv_buf_init("Finalized the file transaction\n", 32);
+        uv_write(req, (uv_stream_t *)client, &buf, 1, NULL);
+    }
 
-        // Close both the handle and the file
-        uv_close((uv_handle_t *)client, on_close);
-        fclose(fp);
-        printf("Successfully received %d bytes, saved to %s\n", (int)nread, filename);
-
-  }
-  // Make sure to free buffer once done
-  free(buf->base);
+    // Make sure to free buffer once done
+    free(buf->base);
 }
 
 /*****************************************************************
  *  alloc buffer
  *****************************************************************/
-void alloc_buffer(uv_handle_t *handle, size_t suggested_size, uv_buf_t *buf)
+void alloc_buffer(uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf)
 {
-    char *base;
-    base = (char *)calloc(1, suggested_size);
-    if(!base)
+    char* base;
+    base = (char*)calloc(1, suggested_size);
+    if (!base)
         *buf = uv_buf_init(NULL, 0);
     else
         *buf = uv_buf_init(base, suggested_size);
@@ -146,45 +178,46 @@ void alloc_buffer(uv_handle_t *handle, size_t suggested_size, uv_buf_t *buf)
 /*****************************************************************
  *  Conection
  *****************************************************************/
-void on_connect(uv_stream_t *server, int status)
+void on_connect(uv_stream_t* server, int status)
 {
-    if(status < 0) {
+    if (status < 0) {
         fprintf(stderr, "Connect error %s\n", uv_strerror(status));
         return;
     }
 
-    uv_tcp_t *client = (uv_tcp_t *)malloc(sizeof(uv_tcp_t));
+    uv_tcp_t* client = (uv_tcp_t*)malloc(sizeof(uv_tcp_t));
     uv_tcp_init(loop, client);
 
-    if(uv_accept(server, (uv_stream_t *)client) == 0) {
+    if (uv_accept(server, (uv_stream_t*)client) == 0) {
         //Get peername
         struct sockaddr_storage peername;
         int peernamelen = sizeof(peername);
-        uv_tcp_getpeername(client, (struct sockaddr*) &peername, &peernamelen);
+        uv_tcp_getpeername(client, (struct sockaddr*)&peername, &peernamelen);
 
         char peernameAsString[INET6_ADDRSTRLEN];
-        uv_ip_name((struct sockaddr*) &peername, peernameAsString, sizeof(peernameAsString));
+        uv_ip_name((struct sockaddr*)&peername, peernameAsString, sizeof(peernameAsString));
 
         //Get sockname
         struct sockaddr_storage sockname;
         int socknamelen = sizeof(sockname);
-        uv_tcp_getsockname(client, (struct sockaddr*) &sockname, &socknamelen);
+        uv_tcp_getsockname(client, (struct sockaddr*)&sockname, &socknamelen);
 
         char socknameAsString[INET6_ADDRSTRLEN];
-        uv_ip_name((struct sockaddr*) &sockname, socknameAsString, sizeof(socknameAsString));
+        uv_ip_name((struct sockaddr*)&sockname, socknameAsString, sizeof(socknameAsString));
 
         printf("Connecting to %s through %s\n", peernameAsString, socknameAsString);
 
-        uv_read_start((uv_stream_t *)client, alloc_buffer, on_read);
-    } else {
-        uv_close((uv_handle_t *)client, on_close);
+        uv_read_start((uv_stream_t*)client, alloc_buffer, on_read);
+    }
+    else {
+        uv_close((uv_handle_t*)client, on_close);
     }
 }
 
 /*****************************************************************
  *                      Main
  *****************************************************************/
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     struct sockaddr_in addr;
     struct arguments arguments;
@@ -204,9 +237,9 @@ int main(int argc, char *argv[])
 
     uv_ip4_addr(arguments.ip, arguments.port, &addr);
 
-    uv_tcp_bind(&server, (const struct sockaddr *)&addr, 0);
-    int r = uv_listen((uv_stream_t *)&server, 128, on_connect);
-    if(r) {
+    uv_tcp_bind(&server, (const struct sockaddr*)&addr, 0);
+    int r = uv_listen((uv_stream_t*)&server, 128, on_connect);
+    if (r) {
         fprintf(stderr, "Listen error %s\n", uv_strerror(r));
         return 1;
     }

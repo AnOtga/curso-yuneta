@@ -23,13 +23,23 @@ def main():
     print("Connection has been established to {} through {} ".format(sock.getpeername(), sock.getsockname()))
 
     try:
+        #Send the file path (name) first
+        sock.sendall((args.FILEPATH + "\0").encode())
+
         # Open file
         with open(args.FILEPATH, "rb") as file:
             content = file.read()
+            fileSize = len(content)
             #print("-- Sending file --\n{}".format(content))
 
-            #Encode both file name and file data in bytes
-            sock.sendall((args.FILEPATH + "\0").encode() + content)
+            #Make sure all bytes are sent
+            sentBytes = 0
+            while sentBytes < fileSize:
+                sent = sock.send(content[sentBytes:])
+                sentBytes += sent
+                #Recieve a confirmation code
+                message = sock.recv(1024)
+                print("Received: {}".format(message.decode()))
 
             file.close()
 
