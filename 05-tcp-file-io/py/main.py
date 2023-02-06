@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import argparse
 import socket
@@ -23,23 +23,19 @@ def main():
     print("Connection has been established to {} through {} ".format(sock.getpeername(), sock.getsockname()))
 
     try:
-        #Send the file path (name) first
-        sock.sendall((args.FILEPATH + "\0").encode())
+        #Send the length of the FILEPATH
+        filepathLength = len(args.FILEPATH)
+        sock.sendall(filepathLength.to_bytes(4, byteorder='big'))
+        #Wait for message incoming from the server
+        fileStatus = sock.recv(1024)
+        print("File status: {}".format(fileStatus.decode()))
 
         # Open file
         with open(args.FILEPATH, "rb") as file:
-            content = file.read()
-            fileSize = len(content)
-            #print("-- Sending file --\n{}".format(content))
+            sock.sendall(file.read())
 
-            #Make sure all bytes are sent
-            sentBytes = 0
-            while sentBytes < fileSize:
-                sent = sock.send(content[sentBytes:])
-                sentBytes += sent
-                #Recieve a confirmation code
-                message = sock.recv(1024)
-                print("Received: {}".format(message.decode()))
+            message = sock.recv(1024)
+            print("Received: {}".format(message.decode()))
 
             file.close()
 
