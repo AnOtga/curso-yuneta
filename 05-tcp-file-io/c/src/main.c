@@ -90,99 +90,90 @@ void on_close(uv_handle_t* handle)
  *******************************************************************/
 void on_read(uv_stream_t* client, ssize_t nread, const uv_buf_t* buf)
 {
-    static int nameLength;
-    static char name[255];
-
-    static int fileLength;
+    static int pathLen = 0;
+    static int fileLen = 0;
+    static char file_name[100];
     static FILE* file;
-    //We haven't reach the EOF, assume something went wrong
+
+    if (nread == UV_EOF) {
+
+        /* El final de los datos se ha alcanzado */
+        uv_read_stop(client);
+        return;
+    }
+
     if (nread < 0) {
+        /* Error */
         if (nread != UV_EOF)
             fprintf(stderr, "Read error %s\n", uv_err_name(nread));
-        uv_close((uv_handle_t*)client, on_close);
-        free(buf->base);
+        uv_close((uv_handle_t*)client, NULL);
         return;
     }
 
     if (nread > 0) {
-        //We send two messages separately
-        //First we send the file name
-        if (nameLength == 0) {
-            //Length of the message being sent is found in the first four bytes (?)
-            memcpy(&nameLength, buf->base, 4);
-            nameLength = ntohl(nameLength);
 
-            //We get the rest of the message
-            memcpy(&name, buf->base + 4, nameLength);
-            name[nameLength] = '\0';
+        if (pathLen == 0) {
+            //Python sends the length of the path encoded in the first 4 bytes
+            memcpy(&pathLen, buf->base, 4);
+            pathLen = ntohl(pathLen);
 
-            //Check if theres a file with the same name
-            if (access(name, F_OK) == 0) {
-                printf("File %s exists. \n", name);
+            //Get the remainder, which is the file name
+            memcpy(file_name, buf->base + 4, pathLen);
+            file_name[pathLen] = '\0';
 
-                //Send a message
+            // Check if the file exists
+            if (access(file_name, F_OK) == 0) {
+                printf("File %s already exists.\n", file_name);
+
                 uv_write_t* req = malloc(sizeof(uv_write_t));
-                uv_buf_t buf = uv_buf_init("File Already Exists\n", 21);
+                uv_buf_t buf = uv_buf_init("File already exists.\n", 21);
                 uv_write(req, (uv_stream_t*)client, &buf, 1, NULL);
 
-                //Open the file in write mode to overwrite
-                file = fopen(name, "w");
+                //Open in write mode to overwrite
+                file = fopen(file_name, "w");
 
                 //Reset
-                //nameLength = 0;
-                //name = char[255];
+                //pathLen = 0;
+                //fileLen = 0;
             }
             else {
-                printf("File %s does not exist. \n", name);
+                printf("File %s did not exist.\n", file_name);
 
-                //Send message
                 uv_write_t* req = malloc(sizeof(uv_write_t));
-                uv_buf_t buf = uv_buf_init("Creating File\n", 15);
+                uv_buf_t buf = uv_buf_init("File did not exist, creating.\n", 30);
                 uv_write(req, (uv_stream_t*)client, &buf, 1, NULL);
-            }
-        }
-        else if (fileLength == 0) {
-            //Once we have a name length, we send the actual file.
-            //Length of the message being sent is found in the first four bytes (?)
-            memcpy(&fileLength, buf->base, 4);
-            fileLength = ntohl(fileLength);
 
-            //Open if its not already open, in append mode
-            if(file == NULL){
-                file = fopen(name, "a");
+                //Open in write mode to overwrite
+                file = fopen(file_name, "w");
             }
+
+        }
+        else if (fileLen == 0) {
+            //In TCP, whenever a file is sent, the size is in the first four bytes
+            memcpy(&fileLen, buf->base, 4);
+            fileLen = ntohl(fileLen);
         }
 
         if (file != NULL) {
-            //Write
+            //Open in append mode
+            //FILE* file = fopen(file_name, "a");
             fwrite(buf->base, 1, nread, file);
+            //fclose(file);
         }
 
-        /*uv_write_t* req = malloc(sizeof(uv_write_t));
-        char progressReport[24];
-        sprintf(progressReport, "%i out of %i\n", currentBytesRead, fileLength);
-        uv_buf_t responseBuf = uv_buf_init(progressReport, strlen(progressReport));
-        uv_write(req, (uv_stream_t*)client, &responseBuf, 1, NULL);*/
+        if (fileLen != 0 && buf->len > nread) {
+
+            uv_write_t* req = malloc(sizeof(uv_write_t));
+            uv_buf_t buf = uv_buf_init("File recieved\n", 15);
+            uv_write(req, (uv_stream_t*)client, &buf, 1, NULL);
+
+            //Close and Reset
+            fclose(file);
+            file = NULL;
+            pathLen = 0;
+            fileLen = 0;
+        }
     }
-
-    if (file != NULL && buf->len > nread) {
-        // Close both the handle and the file when done reading
-        //uv_close((uv_handle_t*)client, on_close);
-        fclose(file);
-        printf("Successfully received %d bytes\n", (int)nread);
-
-        //Send the client a message that we are done
-        uv_write_t* req = malloc(sizeof(uv_write_t));
-        uv_buf_t buf = uv_buf_init("Finalized file transaction\n", 28);
-        uv_write(req, (uv_stream_t*)client, &buf, 1, NULL);
-
-        //Reset
-        file = NULL;
-        nameLength = 0;
-        fileLength = 0;
-    }
-
-    // Make sure to free buffer once done
     free(buf->base);
 }
 

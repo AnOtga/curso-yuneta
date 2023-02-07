@@ -9,6 +9,7 @@ parser = argparse.ArgumentParser(description='Connects to a server address throu
 parser.add_argument("-v", "--version", help="Print program version", action="version", version=program_version)
 parser.add_argument("--ip", "-i", help="IP to connect to", default="127.0.0.1", type=str)
 parser.add_argument("--port", "-p", help="Port to connect to", default=8000, type=int)
+parser.add_argument("--repeat", "-r", help="Times to send the file", default=2, type=int)
 parser.add_argument("FILEPATH", help="Path to the file that will be sent through the port", type=str)
 args = parser.parse_args()
 
@@ -23,21 +24,23 @@ def main():
     print("Connection has been established to {} through {} ".format(sock.getpeername(), sock.getsockname()))
 
     try:
-        #Send the length of the FILEPATH
-        filepathLength = len(args.FILEPATH)
-        sock.sendall(filepathLength.to_bytes(4, byteorder='big'))
-        #Wait for message incoming from the server
-        fileStatus = sock.recv(1024)
-        print("File status: {}".format(fileStatus.decode()))
+        print(f'Sending file: {args.FILEPATH} {args.repeat} times.\n')
+        nLoop = 0
+        while nLoop < args.repeat:
+            pathLen = len(args.FILEPATH)
+            #We aren't going to send a file yet, so we need to encode things manually
+            #Send path length in the first four bytes, as if it were the file size.
+            sock.sendall(pathLen.to_bytes(4, byteorder='big'))
+            sock.sendall(args.FILEPATH.encode())
 
-        # Open file
-        with open(args.FILEPATH, "rb") as file:
-            sock.sendall(file.read())
+            netMsg = sock.recv(1024)
+            print(f'File status: {netMsg.decode()}\n') 
+            with open(args.FILEPATH, 'rb') as f:
+                sock.sendall(f.read())
 
-            message = sock.recv(1024)
-            print("Received: {}".format(message.decode()))
-
-            file.close()
+            netMsg = sock.recv(1024)
+            print(f'Received: {netMsg.decode()}\n')
+            nLoop += 1
 
     finally:
         #Close
