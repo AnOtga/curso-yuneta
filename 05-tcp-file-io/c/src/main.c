@@ -96,14 +96,11 @@ void on_read(uv_stream_t* client, ssize_t nread, const uv_buf_t* buf)
     static FILE* file;
 
     if (nread == UV_EOF) {
-
-        /* El final de los datos se ha alcanzado */
         uv_read_stop(client);
         return;
     }
 
     if (nread < 0) {
-        /* Error */
         if (nread != UV_EOF)
             fprintf(stderr, "Read error %s\n", uv_err_name(nread));
         uv_close((uv_handle_t*)client, NULL);
@@ -135,8 +132,7 @@ void on_read(uv_stream_t* client, ssize_t nread, const uv_buf_t* buf)
                 //Reset
                 //pathLen = 0;
                 //fileLen = 0;
-            }
-            else {
+            } else {
                 printf("File %s did not exist.\n", file_name);
 
                 uv_write_t* req = malloc(sizeof(uv_write_t));
